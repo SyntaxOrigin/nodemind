@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  kalite:
+    name: build / test / clippy / fmt
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Rust kurulumu
+        run: |
+          rustup toolchain install stable --profile minimal
+          rustup default stable
+          rustc --version
+          cargo --version
+
+      # Unix'te statik CRT, Windows'ta MSVC yok; her iki platformda da
+      # harici C kutuphanesi bagimliligi yoktur (bagimlilik politikasi 3.2-D/E).
+      - name: Derleme (release)
+        run: cargo build --release
+
+      - name: Birim ve entegrasyon testleri
+        run: cargo test -- --nocapture
+
+      - name: Clippy
+        run: cargo clippy --all-targets -- -D warnings
+
+      - name: Rustfmt
+        run: cargo fmt --check
+
+      - name: Bagimlilik denetimi (izinli olmayan ag/zaman/UI crate'i olmamali)
+        shell: bash
+        run: |
+          cargo tree --edges normal --prefix none | awk '{print $1}' | sort -u > /tmp/crate-liste.txt
+          cat /tmp/crate-liste.txt
+          if grep -Eiq '^(reqwest|ureq|hyper|tokio|async-std|curl|openssl|rustls|socket2|mio|chrono|time|date_time|egui|winit|gtk|image|png|jpeg-decoder|tiff|resvg|fontdue|notify|walkdir|rand|tempfile|pulldown-cmark|tantivy)$' /tmp/crate-liste.txt; then
+            echo "YASAK BAGIMLILIK BULUNDU"; exit 1
+          fi
+          echo "Bagimlilik denetimi: temiz"

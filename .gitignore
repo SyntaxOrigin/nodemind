@@ -1,0 +1,11 @@
+/target/
+.env
+*.log
+.idea/
+.vscode/
+*.swp
+*.tmp
+
+# Turetilmis veri (rapor b07: "kalici tek dogruluk kaynagi dosya sistemidir").
+# ornek/ altindaki cache/ silinebilir; not dosyalarina dokunulmaz.
+/ornek/cache/

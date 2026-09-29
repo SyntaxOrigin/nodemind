@@ -1,0 +1,29 @@
+[package]
+name = "nodemind"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.74"
+license = "MIT"
+description = "Duz Markdown dosyalari uzerinde calisan; blok referansli, tam metin aramali ve bilgi grafigi ureten terminal bilgi yonetim araci."
+repository = "https://github.com/SyntaxOrigin/nodemind"
+readme = "README.md"
+keywords = ["markdown", "notes", "pkm", "cli", "knowledge-graph"]
+categories = ["command-line-utilities"]
+
+[dependencies]
+# serde: src/sema.rs icindeki indeks belgesi semasi (IndeksBelge, NotKaydi, BlokKaydi)
+# ve src/graf.rs icindeki JSON disa aktarim yapisinin turetilmesi icin gerekli.
+serde = { version = "1", features = ["derive"] }
+# serde_json: src/sema.rs icinde cache/index.json okuma-yazma, src/graf.rs icinde
+# JSON disa aktarimi ve src/main.rs icinde makine-okunur ozet ciktisi icin gerekli.
+serde_json = "1"
+# clap: src/main.rs icindeki alt komut ve secenek cozumlemesi (new/index/search/
+# backlinks/graph/today/check) icin arguman ayristirici (bkz. WORKER_CONTRACT.md 3.2-B).
+clap = { version = "4", features = ["derive"] }
+
+[profile.release]
+opt-level = 3
+lto = "thin"
+codegen-units = 1
+panic = "abort"
+strip = "debuginfo"
